@@ -1,0 +1,148 @@
+import { CeloProvider } from "@celo-tools/celo-ethers-wrapper";
+import { ethers, utils, BigNumber } from "ethers";
+import {BridgeFactory, ERC20HandlerPercentageFeeFactory} from "@chainsafe/chainbridge-contracts";
+
+import { Erc20DetailedFactory } from "../../../Contracts/Erc20DetailedFactory";
+
+import { EvmBridgeConfig, TokenConfig } from "../../../chainbridgeConfig";
+
+export const isCelo = (networkId?: number) =>
+  [42220, 44787, 62320].includes(networkId ?? 0);
+
+const getRpcProviderFromHttpUrl = (url: string) => {
+  const urlInstance = new URL(url);
+
+  if (urlInstance.username && urlInstance.password) {
+    var urlInfo = {
+      url: urlInstance.origin,
+      user: urlInstance.username,
+      password: urlInstance.password,
+    };
+    return new ethers.providers.JsonRpcProvider(urlInfo);
+  }
+  return new ethers.providers.JsonRpcProvider(url);
+};
+
+export function getProvider(destinationChainConfig?: any) {
+  let provider: any;
+  if (isCelo(destinationChainConfig?.networkId)) {
+    provider = new CeloProvider(destinationChainConfig?.rpcUrl);
+  } else if (destinationChainConfig?.rpcUrl.startsWith("wss")) {
+    if (destinationChainConfig.rpcUrl.includes("infura")) {
+      const parts = destinationChainConfig.rpcUrl.split("/");
+
+      provider = new ethers.providers.InfuraWebSocketProvider(
+        destinationChainConfig.networkId,
+        parts[parts.length - 1]
+      );
+    }
+    if (destinationChainConfig.rpcUrl.includes("alchemyapi")) {
+      const parts = destinationChainConfig.rpcUrl.split("/");
+
+      provider = new ethers.providers.AlchemyWebSocketProvider(
+        destinationChainConfig.networkId,
+        parts[parts.length - 1]
+      );
+    }
+  } else {
+    provider = getRpcProviderFromHttpUrl(destinationChainConfig?.rpcUrl);
+  }
+  return provider;
+}
+
+export async function hasTokenSupplies(
+  destinationChain: EvmBridgeConfig,
+  token: TokenConfig,
+  amount: number
+) {
+  const destinationToken = destinationChain?.tokens.find(
+    (_token: TokenConfig) => _token.resourceId === token.resourceId
+  );
+  if (
+    destinationToken &&
+    destinationChain !== undefined &&
+    destinationChain.type === "Ethereum"
+  ) {
+    let provider = getProvider(destinationChain);
+
+    const destinationBridge = BridgeFactory.connect(
+        destinationChain.bridgeAddress,
+        provider
+    );
+    await provider.ready;
+    const erc20destinationToken = Erc20DetailedFactory.connect(
+      destinationToken.address,
+      provider
+    );
+    const destinationNativeCoin = destinationToken.address == "0x0000000000000000000000000000000000000000";
+
+    const destinationErc20Handler = await destinationBridge._resourceIDToHandlerAddress(destinationToken.resourceId)
+
+    const destinationErc20DHandlerInstance = ERC20HandlerPercentageFeeFactory.connect(
+      destinationErc20Handler,
+      provider
+    );
+    const isMintable = await destinationErc20DHandlerInstance._burnList(
+      destinationToken.address
+    );
+    if (isMintable) {
+      console.log("token mintable on destination chain");
+      return true;
+    }
+    let balanceTokens;
+    let erc20Decimals;
+    if (!destinationNativeCoin) {
+      balanceTokens = await erc20destinationToken.balanceOf(destinationErc20Handler);
+      erc20Decimals = destinationToken.decimals ?? await erc20destinationToken.decimals();
+    } else {
+      balanceTokens = await erc20destinationToken.provider.getBalance(destinationErc20Handler);
+      erc20Decimals = 18;
+    }
+
+    const amountAvailable = Number(utils.formatUnits(balanceTokens, erc20Decimals));
+    if (amountAvailable < amount) {
+      console.log("Not enough token balance on destination chain! wanted:", amount, "available:", amountAvailable);
+      return false;
+    }
+    return true;
+  }
+}
+
+export async function detectEIP1559MaxFeePerGas(
+  provider: ethers.providers.Web3Provider
+): Promise<boolean> {
+  try {
+    const feeData = await provider.getFeeData();
+    if (typeof feeData.maxFeePerGas !== "undefined") {
+      return true;
+    }
+  } catch (error) {
+    console.warn(error);
+    console.warn(
+      "Can't access fee data for EIP-1559, fallback to legacy transaction"
+    );
+  }
+  return false;
+}
+
+export async function getPriceCompatibility(
+  provider: ethers.providers.Web3Provider | undefined,
+  homeChainConfig: any,
+  gasPrice: number
+) {
+  let gasPriceCompatibility = undefined;
+  if (provider) {
+    const hasMaxPrice = await detectEIP1559MaxFeePerGas(provider);
+    if (!hasMaxPrice) {
+      gasPriceCompatibility = BigNumber.from(
+        utils.parseUnits(
+          (
+            (homeChainConfig as EvmBridgeConfig).defaultGasPrice || gasPrice
+          ).toString(),
+          9
+        )
+      ).toString();
+    }
+  }
+  return gasPriceCompatibility;
+}

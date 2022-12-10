@@ -19,6 +19,8 @@ const withTM = NextTranspileModules([
   '@pancakeswap/token-lists',
   '@pancakeswap/utils',
   '@pancakeswap/tokens',
+  "@icecreamswap/bridge-ui",
+  "@icecreamswap/bridge-ui-core"
 ])
 
 const withVanillaExtract = createVanillaExtractPlugin()
