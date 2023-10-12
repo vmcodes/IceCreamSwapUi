@@ -1,22 +1,19 @@
 import { AtomBox } from '@pancakeswap/ui'
-import { ArrowBackIcon, Flex, Heading, IconButton, Text } from '@pancakeswap/uikit'
+import { ArrowBackIcon, Card, Flex, Heading, IconButton, Text } from '@pancakeswap/uikit'
 import { AppBody } from '../App'
 import { useRouter } from 'next/router'
 import { PropsWithChildren } from 'react'
 import Page from '../../views/Page'
 import { AppWrapperBody, AppWrapperContainer } from './styles'
-
 interface AppWrapperProps extends PropsWithChildren {
   title: React.ReactNode
   subtitle: React.ReactNode
   hasBackButton?: boolean
   backlink?: string
 }
-
 const AppWrapper: React.FC<AppWrapperProps> = (props) => {
   const { title, subtitle, children, hasBackButton } = props
   const router = useRouter()
-
   return (
     <Page>
       <Flex marginBottom="4em" height="100%" justifyContent="center" width="100%">
@@ -38,17 +35,32 @@ const AppWrapper: React.FC<AppWrapperProps> = (props) => {
                   </IconButton>
                 )}
                 <Flex width={hasBackButton ? undefined : '100%'} flexDirection="column">
-                  <AtomBox
-                    display="flex"
-                    width="full"
-                    alignItems={hasBackButton ? undefined : 'center'}
-                    justifyContent={hasBackButton ? undefined : 'center'}
-                  >
-                    <Heading as="h2">{title}</Heading>
-                  </AtomBox>
-                  <Text color="textSubtle" fontSize="14px" textAlign={hasBackButton ? undefined : 'center'}>
-                    {subtitle}
-                  </Text>
+                  <Heading>
+                    <AtomBox
+                      display="flex"
+                      width="full"
+                      alignItems={hasBackButton ? undefined : 'center'}
+                      justifyContent={hasBackButton ? undefined : 'center'}
+                    >
+                      <Text
+                        fontWeight="bold"
+                        fontSize="24px"
+                        textAlign={hasBackButton ? undefined : 'center'}
+                        marginTop="14px"
+                      >
+                        {title}
+                      </Text>
+                    </AtomBox>
+
+                    <Text
+                      color="textSubtle"
+                      fontSize="14px"
+                      textAlign={hasBackButton ? undefined : 'center'}
+                      marginTop="14px"
+                    >
+                      {subtitle}
+                    </Text>
+                  </Heading>
                 </Flex>
               </AtomBox>
               <AppWrapperBody>{children}</AppWrapperBody>
