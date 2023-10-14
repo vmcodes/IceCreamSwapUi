@@ -14,6 +14,7 @@ import { useRouter } from 'next/router'
 import { trpc } from '@icecreamswap/backend'
 import { getChain } from '@icecreamswap/constants/src/chains'
 import { useActiveChain } from 'hooks/useActiveChain'
+import { ROUTER_ADDRESS_COMMON } from 'config/constants/exchange'
 
 interface DepositModalProps {
   formValues: FormValues
@@ -46,7 +47,7 @@ const CreateModal: React.FC<DepositModalProps> = (props) => {
 
     setStep('transfer')
 
-    const camp = await campaignFactory
+    const campaign = await campaignFactory
       .createCampaign(
         {
           rate: BigNumber.from(formValues?.rate || 0),
@@ -63,38 +64,34 @@ const CreateModal: React.FC<DepositModalProps> = (props) => {
         },
         formValues?.tokenAddress,
         BigNumber.from(0),
-        chain.campaignFactory,
-        '',
+        chain.swap.factoryAddress,
+        ROUTER_ADDRESS_COMMON,
         { gasLimit: BigNumber.from(1000000) },
       )
       .catch((err) => console.error(err))
 
-    console.log(camp)
+    const contract = campaign && (await campaign.wait(1)).events[0].address
 
-    campaignFactory.on(campaignFactory.filters.CampaignAdded(address), async (campaign, ta, owner) => {
-      if (owner !== address) console.log('not creator')
+    const data = {
+      address: contract,
+      chainId: chainId as number,
+      website: formValues?.website,
+      banner: formValues?.banner?.blob,
+      twitter: formValues?.twitter,
+      telegram: formValues?.telegram,
+      discord: formValues?.discord,
+      github: formValues?.github,
+      reddit: formValues?.reddit,
+      description: formValues?.description,
+      tags: ['KYC'],
+      deleted: false,
+      startDate: Math.floor(new Date(formValues?.startDate).getTime() / 1000),
+    }
 
-      const data = {
-        address: campaign,
-        chainId: chainId as number,
-        website: formValues?.website,
-        banner: formValues?.banner?.blob,
-        twitter: formValues?.twitter,
-        telegram: formValues?.telegram,
-        discord: formValues?.discord,
-        github: formValues?.github,
-        reddit: formValues?.reddit,
-        description: formValues?.description,
-        tags: ['KYC'],
-        deleted: false,
-        startDate: Math.floor(new Date(formValues?.startDate).getTime() / 1000),
-      }
-
-      await submit
-        .mutateAsync(data)
-        .then(() => setStep('completed'))
-        .catch((err) => console.error(err))
-    })
+    await submit
+      .mutateAsync(data)
+      .then(() => setStep('completed'))
+      .catch((err) => console.error(err))
   }
 
   const addToken = useAddUserToken()
