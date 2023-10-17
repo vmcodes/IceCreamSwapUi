@@ -53,4 +53,5 @@ export const coreTokens = {
   asi: new ERC20Token(ChainId.CORE, '0xEF51585D985bad6818C8aD7BA6D70cCf6D216c89', 18, 'ASI', 'Asi Core'),
   musk: new ERC20Token(ChainId.CORE, '0x154B5D670Ee6BA945B20A343d68Dff29720e9170', 18, 'MUSK 2.0', 'MUSK 2.0'),
   kigu: new ERC20Token(ChainId.CORE, '0xB0Da4ae4e087DCE159AE1C2d6C6f502e902516A1', 8, 'KIGU', 'Kigurumi'),
+  cts: new ERC20Token(ChainId.CORE, '0x4225A3C57B2622f270D32C12e8135a095ED2dAf6', 18, 'CTS', 'Coretoshis'),
 }
