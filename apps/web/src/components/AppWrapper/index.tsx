@@ -5,6 +5,7 @@ import { useRouter } from 'next/router'
 import { PropsWithChildren } from 'react'
 import Page from '../../views/Page'
 import { AppWrapperBody, AppWrapperContainer } from './styles'
+
 interface AppWrapperProps extends PropsWithChildren {
   title: React.ReactNode
   subtitle: React.ReactNode

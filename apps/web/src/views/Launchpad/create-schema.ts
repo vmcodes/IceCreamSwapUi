@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { useMemo } from 'react'
 import { useTranslation } from '@pancakeswap/localization'
+
 const toBase64 = (file: File) =>
   new Promise<string>((resolve, reject) => {
     const reader = new FileReader()
