@@ -73,6 +73,7 @@ const CreateModal: React.FC<DepositModalProps> = (props) => {
     const contract = campaign && (await campaign.wait(1)).events[0].address
 
     const data = {
+      user: address,
       address: contract,
       chainId: chainId as number,
       website: formValues?.website,
@@ -149,7 +150,7 @@ const CreateModal: React.FC<DepositModalProps> = (props) => {
     completed: transferCompleted,
   }
   return (
-    <Modal title="Creating Token" onDismiss={handleDismiss} minWidth="min(100vw, 426px)">
+    <Modal title="Creating Campaign" onDismiss={handleDismiss} minWidth="min(100vw, 426px)">
       <Flex flexDirection="column" alignItems="stretch" style={{ gap: '1em' }}>
         {steps[step]}
       </Flex>

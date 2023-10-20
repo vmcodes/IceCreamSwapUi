@@ -28,7 +28,7 @@ export const CreateCampaign: React.FC = () => {
   const [onPresentCreateModal] = useModal(<CreateModal formValues={formValues} />, true, true, 'tokenCreateModal')
 
   const { address } = useAccount()
-  const [paid, setPaid] = useState<string | null>(null)
+  const [kyced, setKyced] = useState<boolean>(false)
   const [loading, setLoading] = useState<boolean>(true)
   const [index, setIndex] = useState(0)
   const user = useUser()
@@ -39,32 +39,32 @@ export const CreateCampaign: React.FC = () => {
     window.scrollTo(0, 0)
   }
 
-  const getPaid = async () => {
+  const getKyced = async () => {
     const response = await fetch(`/api/kyc-info/${address}`)
     const data = await response.json()
 
     if (data.status !== 'REJECTED') {
-      setPaid('MINTED')
+      setKyced(true)
     } else {
-      setPaid('NOT MINTED')
+      setKyced(false)
     }
 
     setLoading(false)
   }
 
   useEffect(() => {
-    if (!paid && user.data?.isLoggedIn) {
-      getPaid()
+    if (!kyced && user.data?.isLoggedIn) {
+      getKyced()
     }
 
     setTimeout(() => {
       if (user.data?.isLoggedIn === false) {
         setLoading(false)
-        setPaid('NOT MINTED')
+        setKyced(false)
       }
     }, 3500)
     // eslint-disable-next-line
-  }, [user, paid])
+  }, [user, kyced])
 
   return (
     <AppWrapper title={t('Create Campaign')} subtitle={t('Create your own campaign in seconds')}>
@@ -82,7 +82,7 @@ export const CreateCampaign: React.FC = () => {
           })}
           style={{ display: 'flex', flexDirection: 'column', gap: '1em' }}
         >
-          {paid === 'NOT MINTED' && (
+          {!kyced && !loading && (
             <>
               <span style={{ margin: 'auto', textAlign: 'center', width: '75%' }}>
                 <FormError>You must first become KYC verified or login to your KYC verified account.</FormError>
@@ -96,7 +96,7 @@ export const CreateCampaign: React.FC = () => {
             </>
           )}
 
-          {paid === 'MINTED' && (
+          {kyced && (
             <>
               {index === 0 && (
                 <>
