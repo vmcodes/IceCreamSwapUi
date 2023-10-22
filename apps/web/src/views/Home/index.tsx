@@ -9,6 +9,7 @@ import RoadmapSection from 'views/PancakeSquad/components/RoadmapSection'
 import Hero from './components/Hero'
 import { swapSectionData, earnSectionData, bridgeSectionData } from './components/SalesSection/data'
 import MetricsSection from './components/MetricsSection'
+import TeamSection from './components/TeamSection'
 import SalesSection from './components/SalesSection'
 import Footer from './components/Footer'
 import { WedgeTopLeft, InnerWedgeWrapper, OuterWedgeWrapper, WedgeTopRight } from './components/WedgeSvgs'
@@ -85,6 +86,7 @@ const Home: React.FC<React.PropsWithChildren> = () => {
       >
         <Hero />
       </StyledHeroSection>
+
       <PageSection
         innerProps={{ style: { margin: '0', width: '100%' } }}
         containerProps={{
@@ -95,6 +97,18 @@ const Home: React.FC<React.PropsWithChildren> = () => {
       >
         <MetricsSection />
       </PageSection>
+
+      <PageSection
+        innerProps={{ style: { minHeight: '600px', width: '100%' } }}
+        containerProps={{
+          id: 'home-2',
+        }}
+        index={2}
+        hasCurvedDivider={false}
+      >
+        <TeamSection />
+      </PageSection>
+
       <PageSection
         innerProps={{ style: HomeSectionContainerStyles }}
         background={theme.colors.background}
@@ -109,8 +123,10 @@ const Home: React.FC<React.PropsWithChildren> = () => {
             <WedgeTopLeft />
           </InnerWedgeWrapper>
         </OuterWedgeWrapper>
+
         <SalesSection {...swapSectionData(t)} />
       </PageSection>
+
       <PageSection
         innerProps={{ style: HomeSectionContainerStyles }}
         background={theme.colors.backgroundAlt}
