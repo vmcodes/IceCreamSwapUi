@@ -73,7 +73,6 @@ const CreateModal: React.FC<DepositModalProps> = (props) => {
     const contract = campaign && (await campaign.wait(1)).events[0].address
 
     const data = {
-      user: address,
       address: contract,
       chainId: chainId as number,
       website: formValues?.website,

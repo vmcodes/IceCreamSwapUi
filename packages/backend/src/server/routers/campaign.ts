@@ -4,14 +4,13 @@ import { publicProcedure, router } from '../trpc'
 import { prisma } from '../prisma'
 // import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 import { getChain } from '@icecreamswap/constants/src/chains'
-import { Contract, providers } from 'ethers'
+import { Contract, Signer, providers } from 'ethers'
 import campaignFactoryAbi from '@passive-income/launchpad-contracts/abi/contracts/PSIPadCampaignFactory.sol/PSIPadCampaignFactory.json'
 
 export const campaignRouter = router({
   add: publicProcedure
     .input(
       z.object({
-        user: z.string().length(42),
         address: z.string().length(42),
         chainId: z.number(),
         website: z.string().url(),
@@ -33,42 +32,41 @@ export const campaignRouter = router({
       } else if (!isKyc(ctx.session.user)) {
         throw new Error('MissingKYC')
       }
-      if (input.address) {
-        const campaign = await prisma.campaign.findFirst({
-          where: {
-            address: {
-              equals: input.address.toLowerCase(),
-              mode: 'insensitive',
-            },
-            chainId: input.chainId,
+
+      const campaign = await prisma.campaign.findFirst({
+        where: {
+          address: {
+            equals: input.address.toLowerCase(),
+            mode: 'insensitive',
           },
-        })
+          chainId: input.chainId,
+        },
+      })
 
-        if (campaign) {
-          throw new Error('CampaignExists')
-        }
-      } else if (input.chainId && input.user) {
-        const chain = getChain(input.chainId)
+      if (campaign) {
+        throw new Error('CampaignExists')
+      }
 
-        if (!chain) {
-          throw new Error('MissingChainId')
-        }
+      const chain = getChain(input.chainId)
 
+      if (!chain) {
+        throw new Error('MissingChainId')
+      }
+
+      if (chain.campaignFactory) {
         const provider = new providers.JsonRpcProvider(chain.rpcUrls.default)
 
-        if (!chain.campaignFactory) {
-          throw new Error('MissingCampaignFactory')
+        const contract = new Contract(chain.campaignFactory, campaignFactoryAbi, provider)
+
+        const attached = contract.attach(input.address)
+
+        const tx = attached.deployTransaction
+
+        if (ctx.session.user.wallet !== tx.from) {
+          throw new Error('MissingUserCampaign')
         }
-
-        const factory = new Contract(chain.campaignFactory, campaignFactoryAbi, provider)
-
-        const userCampaigns = await factory.getUserCampaigns(input.user)
-
-        console.dir(userCampaigns)
-
-        if (!userCampaigns) {
-          throw new Error('InvalidCampaign')
-        }
+      } else {
+        throw new Error('MissingCampaignFactory')
       }
 
       try {

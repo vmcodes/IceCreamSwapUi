@@ -43,7 +43,7 @@ export const CreateCampaign: React.FC = () => {
     const response = await fetch(`/api/kyc-info/${address}`)
     const data = await response.json()
 
-    if (data.status !== 'REJECTED') {
+    if (data.status === 'verified') {
       setKyced(true)
     } else {
       setKyced(false)
