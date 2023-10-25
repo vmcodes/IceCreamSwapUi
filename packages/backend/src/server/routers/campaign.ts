@@ -4,7 +4,7 @@ import { publicProcedure, router } from '../trpc'
 import { prisma } from '../prisma'
 // import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 import { getChain } from '@icecreamswap/constants/src/chains'
-import { Contract, Signer, providers } from 'ethers'
+import { Contract, providers } from 'ethers'
 import campaignFactoryAbi from '@passive-income/launchpad-contracts/abi/contracts/PSIPadCampaignFactory.sol/PSIPadCampaignFactory.json'
 
 export const campaignRouter = router({
@@ -53,20 +53,14 @@ export const campaignRouter = router({
         throw new Error('MissingChainId')
       }
 
-      if (chain.campaignFactory) {
-        const provider = new providers.JsonRpcProvider(chain.rpcUrls.default)
+      const provider = new providers.JsonRpcProvider(chain.rpcUrls.default)
 
-        const contract = new Contract(chain.campaignFactory, campaignFactoryAbi, provider)
+      const contract = new Contract(input.address, campaignFactoryAbi, provider)
 
-        const attached = contract.attach(input.address)
+      const wallet = await contract.callStatic.owner()
 
-        const tx = attached.deployTransaction
-
-        if (ctx.session.user.wallet !== tx.from) {
-          throw new Error('MissingUserCampaign')
-        }
-      } else {
-        throw new Error('MissingCampaignFactory')
+      if (ctx.session.user.wallet.toLowerCase() !== wallet.toLowerCase()) {
+        throw new Error('MissingUserCampaign')
       }
 
       try {
