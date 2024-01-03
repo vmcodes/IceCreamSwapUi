@@ -60,18 +60,19 @@ export const campaignRouter = router({
 
         const userCampaigns = await contract.getUserCampaigns(ctx.session.user.wallet)
 
-        let index = userCampaigns.length - 1
+        const campaigns = [...userCampaigns]
+
+        campaigns.reverse()
+
         let match = false
 
-        while (index >= 0) {
-          const campaigns = Number(userCampaigns[index])
+        for (const x of campaigns) {
           // eslint-disable-next-line no-await-in-loop
-          const current = await contract.campaigns(campaigns)
+          const current = await contract.campaigns(Number(x))
+
           if (current === input.address) {
             match = true
-            index -= userCampaigns.length
-          } else {
-            index--
+            break
           }
         }
 
