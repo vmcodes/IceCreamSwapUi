@@ -66,9 +66,9 @@ export const campaignRouter = router({
 
         let match = false
 
-        for (const x of campaigns) {
+        for (const address of campaigns) {
           // eslint-disable-next-line no-await-in-loop
-          const current = await contract.campaigns(Number(x))
+          const current = await contract.campaigns(Number(address))
 
           if (current === input.address) {
             match = true
