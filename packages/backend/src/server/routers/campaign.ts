@@ -53,14 +53,31 @@ export const campaignRouter = router({
         throw new Error('MissingChainId')
       }
 
-      const provider = new providers.JsonRpcProvider(chain.rpcUrls.default)
+      if (chain.campaignFactory) {
+        const provider = new providers.JsonRpcProvider(chain.rpcUrls.default)
 
-      const contract = new Contract(input.address, campaignFactoryAbi, provider)
+        const contract = new Contract(chain.campaignFactory, campaignFactoryAbi, provider)
 
-      const wallet = await contract.callStatic.owner()
+        const userCampaigns = await contract.getUserCampaigns(ctx.session.user.wallet)
 
-      if (ctx.session.user.wallet.toLowerCase() !== wallet.toLowerCase()) {
-        throw new Error('MissingUserCampaign')
+        let index = userCampaigns.length - 1
+        let match = false
+
+        while (index >= 0) {
+          const campaigns = Number(userCampaigns[index])
+          // eslint-disable-next-line no-await-in-loop
+          const current = await contract.campaigns(campaigns)
+          if (current === input.address) {
+            match = true
+            index -= userCampaigns.length
+          } else {
+            index--
+          }
+        }
+
+        if (!match) {
+          throw new Error('MissingUserContract')
+        }
       }
 
       try {
