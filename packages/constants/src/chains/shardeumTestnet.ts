@@ -7,8 +7,8 @@ export const shardeumTestnet: IceChain = {
   features: ['swap'],
   network: 'shardeumTestnet',
   rpcUrls: {
-    public: 'http://54.88.124.37:8080',
-    default: 'http://54.88.124.37:8080',
+    public: 'https://sphinx.shardeum.org',
+    default: 'https://sphinx.shardeum.org',
   },
   blockExplorers: {
     default: { name: 'Shardeum(Testnet) Explorer', url: 'http://45.33.7.22:6001' },
