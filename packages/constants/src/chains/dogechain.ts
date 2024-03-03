@@ -4,7 +4,7 @@ import IceChain from '../ice-chain'
 export const dogechain: IceChain = {
   id: 2000,
   name: 'Dogechain Mainnet',
-  features: ['swap', 'bridge'],
+  features: ['swap'],
   network: 'dogechain',
   rpcUrls: {
     public: 'https://rpc.dogechain.dog',

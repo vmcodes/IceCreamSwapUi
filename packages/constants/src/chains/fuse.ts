@@ -4,7 +4,7 @@ import IceChain from '../ice-chain'
 export const fuse: IceChain = {
   id: 122,
   name: 'Fuse Mainnet',
-  features: ['swap', 'bridge'],
+  features: ['swap'],
   network: 'fuse',
   rpcUrls: {
     public: 'https://rpc.fuse.io',

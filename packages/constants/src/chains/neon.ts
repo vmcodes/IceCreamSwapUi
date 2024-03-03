@@ -4,7 +4,7 @@ import IceChain from '../ice-chain'
 export const neon: IceChain = {
   id: 245022934,
   name: 'Neon EVM Blockchain',
-  features: ['swap', 'bridge', 'farms'],
+  features: ['swap', 'farms'],
   network: 'neon',
   rpcUrls: {
     public: 'https://neon-proxy-mainnet.solana.p2p.org',
