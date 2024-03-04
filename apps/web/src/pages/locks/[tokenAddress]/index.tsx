@@ -1,4 +1,4 @@
-import { SUPPORT_BRIDGE } from 'config/constants/supportChains'
+import { SUPPORT_LOCKS } from "config/constants/supportChains";
 import { useRouter } from 'next/router'
 import { TokenLocksOverview } from '../../../views/Locks'
 
@@ -8,6 +8,6 @@ const TokenLocksOverviewPage = () => {
   return <TokenLocksOverview tokenAddress={String(tokenAddress)} />
 }
 
-TokenLocksOverviewPage.chains = SUPPORT_BRIDGE
+TokenLocksOverviewPage.chains = SUPPORT_LOCKS
 
 export default TokenLocksOverviewPage
